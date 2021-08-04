@@ -30,7 +30,7 @@ class Server
   end
 
   def protect_main_branch
-    ::GitHub.protect_repo(repo_name, 'main')
+    ::GitHub.protect_repo(repo_name, "main")
   end
 
   def create_repo_event?

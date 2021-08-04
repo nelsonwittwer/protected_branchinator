@@ -9,7 +9,7 @@ describe GitHub do
 
   let(:repo_name) { "nelsonwittwer/dat_repo_tho" }
   let(:branch_name) { "main" }
-  let(:options) { {} }
+  let(:options) { ::GitHub::DEFAULT_PROTECT_BRANCH_OPTIONS }
 
   context "protect_repo" do
     context "when only specifying repo name" do
@@ -31,18 +31,21 @@ describe GitHub do
     context "when specifying options" do
       let(:options) {
         {
-          "context" => {"required_status_checks":{"strict":true,"contexts":["contexts"]}},
+          "required_status_checks" => {
+            "enforcement_level" => "everyone",
+            "contexts" => [
+              "default"
+            ]
+          },
           "enforce_admins":true,
           "required_pull_request_reviews":{
             "dismissal_restrictions":{
-              "users":["users"],
-              "teams":["teams"]
+              "users":["nelsonwittwer"],
             },
             "dismiss_stale_reviews":true,
             "require_code_owner_reviews":true,
-            "required_approving_review_count":42
-          },
-          "restrictions":{"users":["users"],"teams":["teams"],"apps":["apps"]}
+            "required_approving_review_count":2
+          }
         }
       }
 

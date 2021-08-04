@@ -1,8 +1,28 @@
 require "octokit"
 
 class GitHub
-  class << self
+  ##
+  # Constants
+  #
+  DEFAULT_PROTECT_BRANCH_OPTIONS = {
+    "required_status_checks" => {
+      "enforcement_level" => "everyone",
+      "contexts" => [
+        "default"
+      ]
+    },
+    "enforce_admins":true,
+    "required_pull_request_reviews":{
+      "dismissal_restrictions":{
+        "users":["nelsonwittwer"],
+      },
+      "dismiss_stale_reviews":true,
+      "require_code_owner_reviews":true,
+      "required_approving_review_count":6
+    }
+  }
 
+  class << self
     ##
     # Protects specified branch for repo.
     #
@@ -23,18 +43,16 @@ class GitHub
     # See also:
     # https://developer.github.com/v3/repos/#enabling-and-disabling-branch-protection
     #
-    def protect_repo(repo_name, branch_name = 'main', options = {})
+    def protect_repo(repo_name, branch_name = 'main', options = DEFAULT_PROTECT_BRANCH_OPTIONS)
       puts "Protecting #{branch_name} branch for #{repo_name}"
-      client.protect_branch(repo_name, branch_name, options)
+      response = client.protect_branch(repo_name, branch_name, options)
+      puts response
     end
 
     private
 
     def client
-      @client ||= ::Octokit::Client.new(
-        :login    => ENV["GITHUB_USERNAME"],
-        :password => ENV["GITUB_PASSWORD"]
-      )
+      @client ||= ::Octokit::Client.new(:access_token => ENV["GITHUB_TOKEN"])
     end
   end
 end
