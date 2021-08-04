@@ -1,7 +1,7 @@
+require 'dotenv/load'
 require 'rack'
 require 'json'
 require_relative './github'
-require 'dotenv/load'
 
 class Server
   attr_reader :env, :body, :headers, :return_status, :return_body
@@ -12,7 +12,7 @@ class Server
     @headers = env["headers"]
 
     begin
-      protect_repo if create_repo_event?
+      protect_main_branch if create_repo_event?
       @return_body = "OK"
       @return_status = 200
     rescue
@@ -26,9 +26,9 @@ class Server
   private
 
   def protect_repo
-    ::GitHub.protect_repo(body)
-  end
+    ::GitHub.protect_main_branch(body, 'main')
 
+  end
   def create_repo_event?
     body["action"] === "created" && headers["X-GitHub-Event"] == "repository"
   end
