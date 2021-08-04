@@ -20,7 +20,7 @@ class GitHub
       "require_code_owner_reviews":true,
       "required_approving_review_count":6
     }
-  }
+  } # FIXME - Should make defaults configurable via ENV variables instead of hard coding
 
   class << self
     ##
@@ -42,6 +42,15 @@ class GitHub
     #
     # See also:
     # https://developer.github.com/v3/repos/#enabling-and-disabling-branch-protection
+    #
+    # NOTE - The GitHub client is dependent upon an environment variable `GITHUB_TOKEN`
+    # being supplied. If running locally, create a .env file with the following value:
+    #
+    # GITHUB_TOKEN=somewhere_over_the_token
+    #
+    # https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token
+    #
+    # FIXME - Should really be using OAuth here but this solution was the fastest to verify everything was working as expected.
     #
     def protect_repo(repo_name, branch_name = 'main', options = DEFAULT_PROTECT_BRANCH_OPTIONS)
       puts "Protecting #{branch_name} branch for #{repo_name}"

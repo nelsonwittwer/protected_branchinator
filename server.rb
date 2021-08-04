@@ -1,4 +1,3 @@
-require 'dotenv/load'
 require 'rack'
 require 'json'
 require_relative './github'
