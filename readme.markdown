@@ -59,12 +59,12 @@ change to make production ready, but balancing my available time for
 this and the other parts of the challenge I figured I'd draw a line to
 ship and give a roadmap of things I'd change if I could.
 
-### 1. Switch to Oauth
+### a. Switch to Oauth
 
 If I had ample time, I should really be using OAuth here but this solution was the fastest to verify everything was working as expected.
 I decided to focus on shipping a first iteration that I could demo rather than having a perfectly implemented solution.
 
-### 2. Additional ENV variables
+### b. Additional ENV variables
 
 The defaults declared in GitHub::DEFAULT_PROTECT_BRANCH_OPTIONS
 shouldn't be hard coded, but should take their values from ENV variables
