@@ -25,8 +25,7 @@ GITHUB_TOKEN=somewhere_over_the_token
 #### Required Environment Variables
 
 An environment variable of `GITHUB_TOKEN` is required to make the requests to protect branches.
-NOTE - The GitHub client is dependent upon an environment variable `GITHUB_TOKEN`
-being supplied.
+Without this token, branch settings will not be changed.
 
 https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token
 
