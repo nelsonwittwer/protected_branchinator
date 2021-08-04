@@ -5,6 +5,8 @@ git_source(:github) do |repo_name|
   "https://github.com/#{repo_name}.git"
 end
 
+gem "dotenv"
+gem "octokit", "~> 4.0"
 gem "rack"
 
 group :development, :test do

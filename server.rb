@@ -1,6 +1,7 @@
 require 'rack'
 require 'json'
 require_relative './github'
+require 'dotenv/load'
 
 class Server
   attr_reader :env, :body, :headers, :return_status, :return_body
