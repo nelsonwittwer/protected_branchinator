@@ -3,8 +3,8 @@ require_relative "../server"
 
 describe Server do
 	let(:repo_create_payload) { File.read(File.join('spec', 'events', 'repo_created_event.json')) }
-	let(:repo_publicized_event) { File.read(File.join('spec', 'events', 'repo_created_event.json')) }
-	let(:milestone_created_event) { File.read(File.join('spec', 'events', 'repo_created_event.json')) }
+	let(:repo_publicized_event) { File.read(File.join('spec', 'events', 'repo_publicized_event.json')) }
+	let(:milestone_created_event) { File.read(File.join('spec', 'events', 'milestone_created_event.json')) }
   let(:app) { Server.new }
   let(:env) { { "request_method" => "POST", "path_info" => "/github_events", "body" => body, "headers" => headers } }
   let(:response) { app.call(env) }
@@ -32,9 +32,10 @@ describe Server do
 
       context "when action is create" do
         let(:body) { repo_create_payload }
+        let(:repo_name) { JSON.parse(body)["repository"]["full_name"] }
 
         it "protects the main branch" do
-          expect(::GitHub).to receive(:protect_repo)
+          expect(::GitHub).to receive(:protect_repo).with(repo_name, "main")
           response
         end
 
@@ -47,7 +48,7 @@ describe Server do
         let(:body) { repo_publicized_event }
 
         it "does not modify the protected branch settings" do
-          expect(::GitHub).not_to receive(:protect_repo).with(env["body"])
+          expect(::GitHub).not_to receive(:protect_repo)
           response
         end
 
@@ -62,7 +63,7 @@ describe Server do
       let(:event) { "milestone" }
 
       it "does not modify the protected branch settings" do
-        expect(::GitHub).not_to receive(:protect_repo).with(env["body"])
+        expect(::GitHub).not_to receive(:protect_repo)
         response
       end
 

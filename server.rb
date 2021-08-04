@@ -25,10 +25,14 @@ class Server
 
   private
 
-  def protect_repo
-    ::GitHub.protect_main_branch(body, 'main')
-
+  def repo_name
+    body["repository"]["full_name"]
   end
+
+  def protect_main_branch
+    ::GitHub.protect_repo(repo_name, 'main')
+  end
+
   def create_repo_event?
     body["action"] === "created" && headers["X-GitHub-Event"] == "repository"
   end
