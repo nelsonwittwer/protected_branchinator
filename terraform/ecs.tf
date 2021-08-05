@@ -4,7 +4,6 @@ resource "aws_ecs_cluster" "protected_branchinator" {
 
 resource "aws_ecs_task_definition" "protected_branchinator" {
   family                   = "protected_branchinator"
-  network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.fargate_cpu
   memory                   = var.fargate_memory
