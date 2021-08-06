@@ -10,6 +10,6 @@ RUN chown -R app:app /home/app
 USER app
 
 # Expose web server port
-EXPOSE 3030
+EXPOSE 80
 
 CMD ["ruby", "/home/app/main.rb"]

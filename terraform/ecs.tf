@@ -9,6 +9,7 @@ resource "aws_ecs_task_definition" "protected_branchinator" {
   memory                   = var.fargate_memory
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
   task_role_arn            = aws_iam_role.ecs_task_role.arn
+  network_mode             = "awsvpc"
 
   container_definitions = <<DEFINITION
 [
@@ -17,7 +18,12 @@ resource "aws_ecs_task_definition" "protected_branchinator" {
     "memory": ${var.fargate_memory},
     "image": "${aws_ecr_repository.protected_branchinator.repository_url}",
     "name": "protected_branchinator",
-    "networkMode": "awsvpc"
+    "portMappings": [
+      {
+        "containerPort": 80,
+        "hostPort": 80
+      }
+    ]
   }
 ]
 DEFINITION
