@@ -32,7 +32,7 @@ class Server
   end
 
   def repo_name
-    body["repository"]["full_name"]
+    body.dig("repository", "full_name")
   end
 
   def protect_main_branch
