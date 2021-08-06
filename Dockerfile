@@ -7,9 +7,10 @@ COPY Gemfile Gemfile.lock /home/app/
 RUN bundle install
 ADD . /home/app
 RUN chown -R app:app /home/app
+RUN setcap cap_net_bind_service=+ep /home/app/main.rb
 USER app
 
 # Expose web server port
-EXPOSE 80
+EXPOSE ${PORT}
 
 CMD ["ruby", "/home/app/main.rb"]

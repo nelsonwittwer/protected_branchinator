@@ -14,6 +14,14 @@ resource "aws_ecs_task_definition" "protected_branchinator" {
   container_definitions = <<DEFINITION
 [
   {
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${aws_cloudwatch_log_group.protected_branchinator.name}",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "${aws_cloudwatch_log_group.protected_branchinator.name}"
+      }
+    },
     "cpu": ${var.fargate_cpu},
     "memory": ${var.fargate_memory},
     "image": "${aws_ecr_repository.protected_branchinator.repository_url}",
