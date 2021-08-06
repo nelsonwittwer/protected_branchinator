@@ -1,5 +1,6 @@
 require 'rack'
 require 'json'
+require 'pry-nav'
 require_relative './github'
 
 class Server
@@ -7,7 +8,6 @@ class Server
 
   def call(env)
     @env = env
-    @body = JSON.parse(env["rack.input"].read) if env["rack.input"]
 
     begin
       protect_main_branch if create_repo_event?
@@ -22,6 +22,10 @@ class Server
   end
 
   private
+
+  def body
+    @body ||= JSON.parse(env["rack.input"].read) if env["rack.input"].instance_of?(StringIO)
+  end
 
   def headers
     @headers ||= begin
