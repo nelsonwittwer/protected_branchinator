@@ -3,13 +3,13 @@ FROM ruby:2.7
 RUN useradd -ms /bin/bash app
 WORKDIR /home/app
 # Copy across dependencies and install them
-ONBUILD COPY Gemfile Gemfile.lock /home/app/
-ONBUILD RUN bundle install
-ONBUILD ADD . /home/app
-ONBUILD RUN chown -R app:app /home/app
-ONBUILD USER app
+COPY Gemfile Gemfile.lock /home/app/
+RUN bundle install
+ADD . /home/app
+RUN chown -R app:app /home/app
+USER app
 
 # Expose web server port
-EXPOSE 3030
+EXPOSE 80
 
-CMD ["ruby","main.rb"]
+CMD ["ruby", "/home/app/main.rb"]

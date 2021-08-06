@@ -1,7 +1,7 @@
 require 'dotenv/load'
 require_relative './server'
 
-DEFAULT_PORT = 3030
+DEFAULT_PORT = 80
 
 app = ::Rack::Builder.new do
   use ::Rack::Reloader

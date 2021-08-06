@@ -56,6 +56,7 @@ GEM
       faraday (> 0.8, < 2.0)
 
 PLATFORMS
+  ruby
   x86_64-darwin-17
 
 DEPENDENCIES

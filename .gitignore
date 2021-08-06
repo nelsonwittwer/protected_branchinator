@@ -1,1 +1,4 @@
 .env
+terraform/.terraform/*
+terraform/terraform.tstate
+terraform/terraform.tstate.bakcup
