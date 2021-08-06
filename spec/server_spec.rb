@@ -6,19 +6,19 @@ describe Server do
 	let(:repo_publicized_event) { File.read(File.join('spec', 'events', 'repo_publicized_event.json')) }
 	let(:milestone_created_event) { File.read(File.join('spec', 'events', 'milestone_created_event.json')) }
   let(:app) { Server.new }
-  let(:env) { { "request_method" => "POST", "path_info" => "/github_events", "body" => body, "headers" => headers } }
+  let(:env) { { "request_method" => "POST", "path_info" => "/github_events", "rack.input" => StringIO.new(body)}.merge(headers) }
   let(:response) { app.call(env) }
   let(:response_status) { response[0] }
   let(:headers) {
     {
-      "Host" => "localhost:4567",
-      "X-GitHub-Delivery" => "72d3162e-cc78-11e3-81ab-4c9367dc0958",
-      "X-Hub-Signature" => "sha1=7d38cdd689735b008b3c702edd92eea23791c5f6",
-      "X-Hub-Signature-256" => "sha256=d57c68ca6f92289e6987922ff26938930f6e66a2d161ef06abdf1859230aa23c",
-      "User-Agent" => "GitHub-Hookshot/044aadd",
+      "HTTP_Host" => "localhost:4567",
+      "HTTP_X-GitHub-Delivery" => "72d3162e-cc78-11e3-81ab-4c9367dc0958",
+      "HTTP_X-Hub-Signature" => "sha1=7d38cdd689735b008b3c702edd92eea23791c5f6",
+      "HTTP_X-Hub-Signature-256" => "sha256=d57c68ca6f92289e6987922ff26938930f6e66a2d161ef06abdf1859230aa23c",
+      "HTTP_User-Agent" => "GitHub-Hookshot/044aadd",
       "Content-Type" => "application/json",
       "Content-Length" => 6615,
-      "X-GitHub-Event" => event
+      "HTTP_X-GitHub-Event" => event
     }
   }
 
@@ -27,6 +27,14 @@ describe Server do
   end
 
   context "POST /github_events" do
+    context "when empty request" do
+      let(:env) { { "request_method" => "GET", "rack.input" => nil, "headers" => nil } }
+
+      it "returns an ok status" do
+        expect(response_status).to eq(200)
+      end
+    end
+
     context "when repo event" do
       let(:event) { "repository" }
 

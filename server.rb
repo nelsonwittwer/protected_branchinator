@@ -7,8 +7,7 @@ class Server
 
   def call(env)
     @env = env
-    @body = JSON.parse(env["body"])
-    @headers = env["headers"]
+    @body = JSON.parse(env["rack.input"].read) if env["rack.input"]
 
     begin
       protect_main_branch if create_repo_event?
@@ -18,11 +17,19 @@ class Server
       @return_body = "There was a problem processing this event"
       @return_status = 500
     ensure
-      return [return_status, {}, return_body]
+      return [return_status, {}, [return_body]]
     end
   end
 
   private
+
+  def headers
+    @headers ||= begin
+      env.select do |k,v|
+        k.start_with? 'HTTP_'
+      end.transform_keys { |k| k.sub(/^HTTP_/, '') }
+    end
+  end
 
   def repo_name
     body["repository"]["full_name"]
@@ -33,6 +40,8 @@ class Server
   end
 
   def create_repo_event?
+    return false if body.nil? || headers.nil?
+
     body["action"] === "created" && headers["X-GitHub-Event"] == "repository"
   end
 end
