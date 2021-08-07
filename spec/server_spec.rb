@@ -28,7 +28,7 @@ describe Server do
 
   context "POST /github_events" do
     context "when empty request" do
-      let(:env) { { "request_method" => "GET", "rack.input" => nil, "headers" => nil } }
+      let(:env) { { "request_method" => "GET", "rack.input" => StringIO.new("") } }
 
       it "returns an ok status" do
         expect(response_status).to eq(200)

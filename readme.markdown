@@ -71,3 +71,24 @@ that could be changed with a configuration change and not a software
 change. Again, needing the draw the line to shipping somewhere I'd love
 to configure that but I need to spend my time on a solid working demo
 than a bullet proof production ready app.
+
+### c. Run container as different user than root
+
+ECS Fargate has an unfortunate limitation that they don't let you map
+ports. If I run a container on port 3030 the host port has to also be
+3030. Layering on to that complication, there are permissioning issues
+      to running containers on protected ports (80) that were going to
+take more time to solve.
+
+In order to get this demo working, I removed my usual workflow of
+running on large port and mapping to standard TCP port to just running
+port 80 as root. This is gross and opens up a few security
+vulnerabilities.
+
+
+### d. Lock down GitHub event hook API
+
+[Securing
+webhooks](https://docs.github.com/en/developers/webhooks-and-events/webhooks/securing-your-webhooks)
+is pretty stragith forward, but I wanted to limit my scope for this
+initial proof-of-concept in favor of shipping.

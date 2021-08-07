@@ -28,8 +28,14 @@ resource "aws_ecs_task_definition" "protected_branchinator" {
     "name": "protected_branchinator",
     "portMappings": [
       {
-        "containerPort": 80,
-        "hostPort": 80
+        "containerPort":80,
+        "hostPort":80
+      }
+    ],
+    "environment": [
+      {
+        "name": "HOST",
+        "value": "0.0.0.0"
       }
     ]
   }

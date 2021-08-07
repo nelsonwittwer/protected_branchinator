@@ -1,16 +1,11 @@
 FROM ruby:2.7
-# Create and switch to a user called app
-RUN useradd -ms /bin/bash app
-WORKDIR /home/app
+WORKDIR /srv/protected_branchinator
 # Copy across dependencies and install them
-COPY Gemfile Gemfile.lock /home/app/
+COPY Gemfile Gemfile.lock /srv/protected_branchinator/
 RUN bundle install
-ADD . /home/app
-RUN chown -R app:app /home/app
-RUN setcap cap_net_bind_service=+ep /home/app/main.rb
-USER app
+ADD . /srv/protected_branchinator
 
 # Expose web server port
-EXPOSE ${PORT}
+EXPOSE 80
 
-CMD ["ruby", "/home/app/main.rb"]
+CMD ["bundle", "exec", "ruby", "/srv/protected_branchinator/main.rb"]

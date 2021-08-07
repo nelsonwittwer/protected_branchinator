@@ -24,7 +24,11 @@ class Server
   private
 
   def body
-    @body ||= JSON.parse(env["rack.input"].read) if env["rack.input"].instance_of?(StringIO)
+    @body ||= begin
+      return unless env["rack.input"].instance_of?(StringIO)
+      body = env["rack.input"].read
+      body == "" ? {} : JSON.parse(body)
+    end
   end
 
   def headers
