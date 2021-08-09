@@ -78,7 +78,16 @@ AWSID.dkr.ecr.us-east-1.amazonaws.com`
  aws ecs update-service --cluster protected_branchinator --service protected_branchinator --force-new-deployment
 ```
 
-## 3. Things to clean up
+## 3. Cloud Hosting - Terraform
+
+In the `/terraform` directory of this repo is the infastructure as code
+used to run this service. Currently the state file is not commited to
+source control as it has secrets.
+
+Assuming you have the state file, you can make modifications to any of
+the terraform files and run `terraform apply` to make AWS modifications.
+
+## 4. Things to clean up
 
 I focused my time on this project on getting a demo up as soon as
 possible while maintaing a balance of reliability with testing the
@@ -130,3 +139,12 @@ Currently the GitHub organization event is configured to send events to
 the public IP address of the container running this image. This makes
 automatic deployments super tricky and also exposes GitHub events to HTTP
 listeners which is a security risk.
+
+### f. Terraform State
+
+The terraform state file is ignored in version control and makes it
+impossible to collaborate with this AWS cloud with others. We'd need to
+either 1). Move secrets to AWS secrets manager so state file could be
+commited to version control or 2). use [one of rmeote
+state](https://www.terraform.io/docs/language/state/remote.html)
+strategies encouraged by HashiCorp.
