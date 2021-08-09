@@ -3,6 +3,7 @@ require_relative "../server"
 
 describe Server do
 	let(:repo_create_payload) { File.read(File.join('spec', 'events', 'repo_created_event.json')) }
+	let(:branch_created_event) { File.read(File.join('spec', 'events', 'branch_created_event.json')) }
 	let(:repo_publicized_event) { File.read(File.join('spec', 'events', 'repo_publicized_event.json')) }
 	let(:milestone_created_event) { File.read(File.join('spec', 'events', 'milestone_created_event.json')) }
   let(:app) { Server.new }
@@ -27,9 +28,24 @@ describe Server do
     allow(::GitHub).to receive(:protect_repo)
   end
 
-  context "POST /github_events" do
+  context "POST /" do
     context "when empty request" do
       let(:env) { { "request_method" => "GET", "logger" => logger, "rack.input" => StringIO.new("") } }
+
+      it "returns an ok status" do
+        expect(response_status).to eq(200)
+      end
+    end
+
+    context "when branch create event" do
+      let(:body) { branch_created_event }
+      let(:event) { "branch" }
+      let(:repo_name) { JSON.parse(body)["repository"]["full_name"] }
+
+      it "protects the repo's master branch" do
+        expect(::GitHub).to receive(:protect_repo).with(repo_name, "main", env["logger"])
+        response
+      end
 
       it "returns an ok status" do
         expect(response_status).to eq(200)
@@ -43,8 +59,8 @@ describe Server do
         let(:body) { repo_create_payload }
         let(:repo_name) { JSON.parse(body)["repository"]["full_name"] }
 
-        it "protects the main branch" do
-          expect(::GitHub).to receive(:protect_repo).with(repo_name, "main", env["logger"])
+        it "does not protect the main branch" do
+          expect(::GitHub).not_to receive(:protect_repo)
           response
         end
 

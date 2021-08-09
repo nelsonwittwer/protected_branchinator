@@ -8,7 +8,7 @@ class Server
     return_body, return_status = nil, nil
 
     begin
-      protect_main_branch(env) if create_repo_event?(env)
+      protect_new_branch(env) if new_master_branch_created?(env)
       return_body = "OK"
       return_status = 200
     rescue
@@ -49,15 +49,16 @@ class Server
     env["parsed_request_body"].dig("repository", "full_name")
   end
 
-  def protect_main_branch(env)
+  def protect_new_branch(env)
     ::GitHub.protect_repo(repo_name(env), "main", env["logger"])
   end
 
-  def create_repo_event?(env)
+  def new_master_branch_created?(env)
     request_body = request_body(env)
-    request_headers = request_headers(env)
-    return false if request_body.nil? || request_headers.nil?
+    return false if request_body.nil?
+    return false if request_body["ref"].nil?
+    return false if request_body["ref_type"] != "branch"
 
-    request_body["action"] === "created" && request_headers["X_GITHUB_EVENT"] == "repository"
+    request_body.dig("ref") == request_body.dig("master_branch")
   end
 end
