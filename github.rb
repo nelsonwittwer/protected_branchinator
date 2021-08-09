@@ -24,6 +24,28 @@ class GitHub
 
   class << self
     ##
+    # Creates an issue in the GitHub repo
+    #
+    # @repo_name - Integer, String, Hash, Repository) — A GitHub repository.
+    # @branch_name - String - branch name to be protected
+    # @logger - Logger - Logger to puts logging data
+    # @options - Hash - Issues options:
+    #   :assignee (String) — User login.
+    #   :assignees (Array<String>) — User login.
+    #   :milestone (Integer) — Milestone number.
+    #   :labels (String) — List of comma separated Label names. Example: bug,ui,@high.
+    #
+    # Create Issue Docs:
+    # https://www.rubydoc.info/gems/octokit/Octokit/Client/Issues#create_issue-instance_method
+    #
+    # See also:
+    # https://docs.github.com/en/rest/reference/issues#create-an-issue
+    #
+    def create_issue(repo_name, title, body, options = {})
+      client.create_issue(repo_name, title, body, options)
+    end
+
+    ##
     # Protects specified branch for repo.
     #
     # @repo_name - Integer, String, Hash, Repository) — A GitHub repository.
@@ -53,16 +75,30 @@ class GitHub
     #
     # FIXME - Should really be using OAuth here but this solution was the fastest to verify everything was working as expected.
     #
-    def protect_repo(repo_name, branch_name, logger, options = DEFAULT_PROTECT_BRANCH_OPTIONS)
-      logger.info("Protecting #{branch_name} branch for #{repo_name}")
-      response = client.protect_branch(repo_name, branch_name, options)
-      logger.info(response)
+    def protect_repo(repo_name, branch_name, options = DEFAULT_PROTECT_BRANCH_OPTIONS)
+      return if no_branches_on_repo?(repo_name)
+
+      client.protect_branch(repo_name, branch_name, options)
     end
 
     private
 
+    # FIXME - Should really be using OAuth here but this solution was the fastest to verify everything was working as expected.
+    # NOTE - The GitHub client is dependent upon an environment variable `GITHUB_TOKEN`
+    # being supplied. If running locally, create a .env file with the following value:
+    #
+    # GITHUB_TOKEN=somewhere_over_the_token
+    #
+    # https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token
+    #
     def client
       @client ||= ::Octokit::Client.new(:access_token => ENV["GITHUB_TOKEN"])
+    end
+
+    # https://www.rubydoc.info/gems/octokit/Octokit/Client/Repositories#branches-instance_method
+    #
+    def no_branches_on_repo?(repo_name)
+      client.branches(repo_name).empty?
     end
   end
 end

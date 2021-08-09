@@ -23,9 +23,13 @@ describe Server do
     }
   }
   let(:logger) { double("logger", :info => nil) }
+  let(:event_sender) { JSON.parse(body).dig("sender", "login") }
+  let(:title) { "FYI - Automatically Protected main branch" }
+  let(:issue_body) { "@#{event_sender} - We have automatically protected the main branch of this new repository." }
 
   before do
     allow(::GitHub).to receive(:protect_repo)
+    allow(::GitHub).to receive(:create_issue)
   end
 
   context "POST /" do
@@ -47,6 +51,11 @@ describe Server do
         response
       end
 
+      it "creates an issue notifying the branch creator of the protection" do
+        expect(::GitHub).to receive(:create_issue).with(repo_name, title, issue_body)
+        response
+      end
+
       it "returns an ok status" do
         expect(response_status).to eq(200)
       end
@@ -59,8 +68,13 @@ describe Server do
         let(:body) { repo_create_payload }
         let(:repo_name) { JSON.parse(body)["repository"]["full_name"] }
 
-        it "does not protect the main branch" do
-          expect(::GitHub).not_to receive(:protect_repo)
+        it "protects the repo's master branch" do
+          expect(::GitHub).to receive(:protect_repo).with(repo_name, "main", env["logger"])
+          response
+        end
+
+        it "creates an issue notifying the branch creator of the protection" do
+          expect(::GitHub).to receive(:create_issue).with(repo_name, title, issue_body)
           response
         end
 

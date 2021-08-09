@@ -9,6 +9,7 @@ class Server
 
     begin
       protect_new_branch(env) if new_master_branch_created?(env)
+      protect_new_branch(env) if create_repo_event?(env)
       return_body = "OK"
       return_status = 200
     rescue
@@ -20,6 +21,14 @@ class Server
   end
 
   private
+
+  def create_repo_event?(env)
+    request_body = request_body(env)
+    request_headers = request_headers(env)
+    return false if request_body.nil? || request_headers.nil?
+
+    request_body["action"] === "created" && request_headers["X_GITHUB_EVENT"] == "repository"
+  end
 
   def request_body(env)
     return env["parsed_request_body"] if env["parsed_request_body"]
@@ -51,6 +60,7 @@ class Server
 
   def protect_new_branch(env)
     ::GitHub.protect_repo(repo_name(env), "main", env["logger"])
+    notify_of_branch_protection(env)
   end
 
   def new_master_branch_created?(env)
@@ -60,5 +70,13 @@ class Server
     return false if request_body["ref_type"] != "branch"
 
     request_body.dig("ref") == request_body.dig("master_branch")
+  end
+
+  def notify_of_branch_protection(env)
+    event_sender = env.dig("parsed_request_body", "sender", "login")
+    title = "FYI - Automatically Protected main branch"
+    issue_body = "@#{event_sender} - We have automatically protected the main branch of this new repository."
+
+    ::GitHub.create_issue(repo_name(env), title, issue_body)
   end
 end
