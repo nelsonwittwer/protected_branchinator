@@ -31,8 +31,8 @@ https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-
 
 #### Optional Environment Variables
 
-`PORT` - To override the server default of `3030`
-
+`PORT` - To override the server default of `80`
+`HOST` - Host address for the server
 
 ## 2. Running the server
 
@@ -45,7 +45,38 @@ https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-
 Protected Branchinator is designed to run in Docker. Ensure your
 container properly attaches to the port that is exposed to run the
 service. Unless it is overriden with the `PORT` environment variable,
-the default is port `3030`.
+the default is port `80`.
+
+### Deployment
+0. Login to AWS CLI
+You'll need to configure your [AWS
+CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) to use your AWS API key.
+
+1. Build new Docker image
+
+```
+docker build . -t protected_branchinator
+```
+
+2. Login to AWS ECR
+
+```
+aws ecr get-login-password --region us-east-1 | sudo docker login
+--username AWS --password-stdin
+AWSID.dkr.ecr.us-east-1.amazonaws.com`
+```
+
+3. Tag latest branch
+
+```
+  docker tag protected_branchinator:latest AWSID.dkr.ecr.us-east-1.amazonaws.com/protected_branchinator:latest
+```
+
+4. Trigger new deployment
+
+```
+ aws ecs update-service --cluster protected_branchinator --service protected_branchinator --force-new-deployment
+```
 
 ## 3. Things to clean up
 
@@ -92,3 +123,10 @@ vulnerabilities.
 webhooks](https://docs.github.com/en/developers/webhooks-and-events/webhooks/securing-your-webhooks)
 is pretty stragith forward, but I wanted to limit my scope for this
 initial proof-of-concept in favor of shipping.
+
+### e. Add HTTPS application load balancer
+
+Currently the GitHub organization event is configured to send events to
+the public IP address of the container running this image. This makes
+automatic deployments super tricky and also exposes GitHub events to HTTP
+listeners which is a security risk.
