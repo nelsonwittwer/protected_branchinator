@@ -27,7 +27,8 @@ class GitHub
     # Protects specified branch for repo.
     #
     # @repo_name - Integer, String, Hash, Repository) — A GitHub repository.
-    # @branch_name - String - defaults to 'main'
+    # @branch_name - String - branch name to be protected
+    # @logger - Logger - Logger to puts logging data
     # @options - Hash - :required_status_checks (Hash) — If not null, the following keys are required:
     #  :enforce_admins [boolean] Enforce required status checks for repository administrators.
     #  :strict [boolean] Require branches to be up to date before merging.
@@ -52,10 +53,10 @@ class GitHub
     #
     # FIXME - Should really be using OAuth here but this solution was the fastest to verify everything was working as expected.
     #
-    def protect_repo(repo_name, branch_name = 'main', options = DEFAULT_PROTECT_BRANCH_OPTIONS)
-      puts "Protecting #{branch_name} branch for #{repo_name}"
+    def protect_repo(repo_name, branch_name, logger, options = DEFAULT_PROTECT_BRANCH_OPTIONS)
+      logger.info("Protecting #{branch_name} branch for #{repo_name}")
       response = client.protect_branch(repo_name, branch_name, options)
-      puts response
+      logger.info(response)
     end
 
     private

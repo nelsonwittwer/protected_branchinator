@@ -4,18 +4,16 @@ require 'pry-nav'
 require_relative './github'
 
 class Server
-  attr_reader :env, :body, :headers, :return_status, :return_body
-
   def call(env)
-    @env = env
+    return_body, return_status = nil, nil
 
     begin
-      protect_main_branch if create_repo_event?
-      @return_body = "OK"
-      @return_status = 200
+      protect_main_branch(env) if create_repo_event?(env)
+      return_body = "OK"
+      return_status = 200
     rescue
-      @return_body = "There was a problem processing this event"
-      @return_status = 500
+      return_body = "There was a problem processing this event"
+      return_status = 500
     ensure
       return [return_status, {}, [return_body]]
     end
@@ -23,33 +21,43 @@ class Server
 
   private
 
-  def body
-    @body ||= begin
-      return unless env["rack.input"].instance_of?(StringIO)
-      body = env["rack.input"].read
-      body == "" ? {} : JSON.parse(body)
-    end
+  def request_body(env)
+    return env["parsed_request_body"] if env["parsed_request_body"]
+
+    body = env["rack.input"].read
+    env["body"] = body
+    body = "{}" if body.empty?
+    body = body.gsub("\\n", "")
+    body = JSON.parse(body)
+    env["parsed_request_body"] = body
+    body
   end
 
-  def headers
-    @headers ||= begin
-      env.select do |k,v|
-        k.start_with? 'HTTP_'
-      end.transform_keys { |k| k.sub(/^HTTP_/, '') }
-    end
+  def request_headers(env)
+    return env["headers"] if env["headers"]
+
+    headers = env.select do |k,v|
+      k.start_with? 'HTTP_'
+    end.transform_keys { |k| k.sub(/^HTTP_/, '') }
+    headers.transform_keys { |k| k.upcase }
+    env["headers"] = headers
+    headers
   end
 
-  def repo_name
-    body.dig("repository", "full_name")
+  def repo_name(env)
+    request_body = env.dig("parsed_request_body", "repository", "full_name")
+    env["parsed_request_body"].dig("repository", "full_name")
   end
 
-  def protect_main_branch
-    ::GitHub.protect_repo(repo_name, "main")
+  def protect_main_branch(env)
+    ::GitHub.protect_repo(repo_name(env), "main", env["logger"])
   end
 
-  def create_repo_event?
-    return false if body.nil? || headers.nil?
+  def create_repo_event?(env)
+    request_body = request_body(env)
+    request_headers = request_headers(env)
+    return false if request_body.nil? || request_headers.nil?
 
-    body["action"] === "created" && headers["X-GitHub-Event"] == "repository"
+    request_body["action"] === "created" && request_headers["X_GITHUB_EVENT"] == "repository"
   end
 end

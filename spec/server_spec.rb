@@ -6,7 +6,7 @@ describe Server do
 	let(:repo_publicized_event) { File.read(File.join('spec', 'events', 'repo_publicized_event.json')) }
 	let(:milestone_created_event) { File.read(File.join('spec', 'events', 'milestone_created_event.json')) }
   let(:app) { Server.new }
-  let(:env) { { "request_method" => "POST", "path_info" => "/github_events", "rack.input" => StringIO.new(body)}.merge(headers) }
+  let(:env) { { "request_method" => "POST", "path_info" => "/github_events", "logger" => logger, "rack.input" => StringIO.new(body)}.merge(headers) }
   let(:response) { app.call(env) }
   let(:response_status) { response[0] }
   let(:headers) {
@@ -18,9 +18,10 @@ describe Server do
       "HTTP_User-Agent" => "GitHub-Hookshot/044aadd",
       "Content-Type" => "application/json",
       "Content-Length" => 6615,
-      "HTTP_X-GitHub-Event" => event
+      "HTTP_X_GITHUB_EVENT" => event
     }
   }
+  let(:logger) { double("logger", :info => nil) }
 
   before do
     allow(::GitHub).to receive(:protect_repo)
@@ -28,7 +29,7 @@ describe Server do
 
   context "POST /github_events" do
     context "when empty request" do
-      let(:env) { { "request_method" => "GET", "rack.input" => StringIO.new("") } }
+      let(:env) { { "request_method" => "GET", "logger" => logger, "rack.input" => StringIO.new("") } }
 
       it "returns an ok status" do
         expect(response_status).to eq(200)
@@ -43,7 +44,7 @@ describe Server do
         let(:repo_name) { JSON.parse(body)["repository"]["full_name"] }
 
         it "protects the main branch" do
-          expect(::GitHub).to receive(:protect_repo).with(repo_name, "main")
+          expect(::GitHub).to receive(:protect_repo).with(repo_name, "main", env["logger"])
           response
         end
 
