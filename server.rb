@@ -59,7 +59,7 @@ class Server
   end
 
   def protect_new_branch(env)
-    ::GitHub.protect_repo(repo_name(env), "main", env["logger"])
+    ::GitHub.protect_repo(repo_name(env), "main")
     notify_of_branch_protection(env)
   end
 

@@ -47,7 +47,7 @@ describe Server do
       let(:repo_name) { JSON.parse(body)["repository"]["full_name"] }
 
       it "protects the repo's master branch" do
-        expect(::GitHub).to receive(:protect_repo).with(repo_name, "main", env["logger"])
+        expect(::GitHub).to receive(:protect_repo).with(repo_name, "main")
         response
       end
 
@@ -69,7 +69,7 @@ describe Server do
         let(:repo_name) { JSON.parse(body)["repository"]["full_name"] }
 
         it "protects the repo's master branch" do
-          expect(::GitHub).to receive(:protect_repo).with(repo_name, "main", env["logger"])
+          expect(::GitHub).to receive(:protect_repo).with(repo_name, "main")
           response
         end
 

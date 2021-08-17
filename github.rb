@@ -28,7 +28,6 @@ class GitHub
     #
     # @repo_name - Integer, String, Hash, Repository) — A GitHub repository.
     # @branch_name - String - branch name to be protected
-    # @logger - Logger - Logger to puts logging data
     # @options - Hash - Issues options:
     #   :assignee (String) — User login.
     #   :assignees (Array<String>) — User login.
@@ -50,7 +49,6 @@ class GitHub
     #
     # @repo_name - Integer, String, Hash, Repository) — A GitHub repository.
     # @branch_name - String - branch name to be protected
-    # @logger - Logger - Logger to puts logging data
     # @options - Hash - :required_status_checks (Hash) — If not null, the following keys are required:
     #  :enforce_admins [boolean] Enforce required status checks for repository administrators.
     #  :strict [boolean] Require branches to be up to date before merging.
